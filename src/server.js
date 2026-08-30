@@ -1,4 +1,3 @@
-// src/server.js
 require('dotenv').config();
 const path = require('path');
 const express = require('express');
@@ -10,20 +9,76 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 let linkedInClient;
+let linkedInSession = {
+  liAt: process.env.LINKEDIN_LI_AT,
+  jsessionId: process.env.LINKEDIN_JSESSIONID
+};
 
 function getLinkedInClient() {
   if (!linkedInClient) {
     linkedInClient = createLinkedInClient(
-      process.env.LINKEDIN_LI_AT,
-      process.env.LINKEDIN_JSESSIONID
+      linkedInSession.liAt,
+      linkedInSession.jsessionId
     );
   }
 
   return linkedInClient;
 }
 
+function setLinkedInSession(liAt, jsessionId) {
+  linkedInSession = { liAt, jsessionId };
+  linkedInClient = createLinkedInClient(liAt, jsessionId);
+}
+
+function requireAdmin(req, res, next) {
+  const adminApiKey = process.env.ADMIN_API_KEY;
+  if (!adminApiKey) {
+    return res.status(503).json({
+      status: 'error',
+      message: 'Admin session refresh is not configured.'
+    });
+  }
+
+  const authHeader = req.get('authorization') || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+
+  if (token !== adminApiKey) {
+    return res.status(401).json({
+      status: 'error',
+      message: 'Invalid admin token.'
+    });
+  }
+
+  next();
+}
+
 app.get('/api/v1/health', (_req, res) => {
   res.json({ status: 'ok' });
+});
+
+app.post('/api/v1/admin/session', requireAdmin, (req, res) => {
+  const { liAt, jsessionId } = req.body || {};
+
+  if (!liAt || !jsessionId) {
+    return res.status(400).json({
+      status: 'error',
+      message: 'Both "liAt" and "jsessionId" are required.'
+    });
+  }
+
+  try {
+    setLinkedInSession(liAt, jsessionId);
+
+    return res.json({
+      status: 'success',
+      message: 'LinkedIn session updated for this running server process.'
+    });
+  } catch (error) {
+    return res.status(400).json({
+      status: 'error',
+      message: error.message
+    });
+  }
 });
 
 async function profileHandler(req, res) {
@@ -46,7 +101,7 @@ async function profileHandler(req, res) {
       `/identity/dash/profiles?q=memberIdentity&memberIdentity=${vanityName}&decorationId=com.linkedin.voyager.dash.deco.identity.profile.FullProfileWithEntities-101`
     );
 
-    const baseData = parseProfileView(profileRes.data, vanityName);
+    const baseData = parseProfileView(profileRes.data);
     const profileUrn = baseData._profileUrn;
     baseData.profileUrl = baseData.profileUrl || `https://www.linkedin.com/in/${vanityName}/`;
 

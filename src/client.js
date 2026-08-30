@@ -1,4 +1,3 @@
-// src/client.js
 const axios = require('axios');
 
 function createLinkedInClient(liAt, jsessionId) {
