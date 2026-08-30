@@ -8,6 +8,10 @@ Hosted API and tester page:
 
 https://linkedin-profile-api-rq4o.onrender.com/
 
+## Screenshot
+
+![LinkedIn Profile API tester](docs/demo-screenshot.png)
+
 ## Features
 
 - Accepts LinkedIn profile URLs from `linkedin.com/in/...`
