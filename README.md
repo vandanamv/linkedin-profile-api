@@ -1,6 +1,6 @@
 # LinkedIn Profile API
 
-A small Express API that accepts a LinkedIn profile URL and returns structured JSON for the public/profile-visible fields available to the authenticated LinkedIn session configured in the backend.
+A browserless Express API that accepts a LinkedIn profile URL and returns structured JSON for the profile fields available to the authenticated LinkedIn session configured in the backend.
 
 ## Live Demo
 
@@ -8,16 +8,12 @@ Hosted API and tester page:
 
 https://linkedin-profile-api-rq4o.onrender.com/
 
-## Screenshot
-
-Add the deployed tester screenshot at `docs/demo-screenshot.png`, then this preview will render in GitHub:
-
-![LinkedIn Profile API tester](docs/demo-screenshot.png)
-
 ## Features
 
 - Accepts LinkedIn profile URLs from `linkedin.com/in/...`
 - Uses an authenticated LinkedIn web session through `li_at` and `JSESSIONID` cookies
+- Directly calls LinkedIn Voyager endpoints from the backend with Axios
+- Does not use Puppeteer, Playwright, Selenium, or browser automation
 - Returns profile metadata, images, about, experience, education, skills, certifications, and languages when LinkedIn returns those sections
 - Includes a small hosted tester page at `/` for quickly pasting a profile URL and viewing JSON
 - Provides health-check and Docker support for hosted HTTPS deployments
@@ -73,6 +69,12 @@ GET /
 
 Opens a minimal tester page where a reviewer can paste a LinkedIn profile URL and see the JSON returned by `POST /api/v1/profile`.
 
+Live tester:
+
+```text
+https://linkedin-profile-api-rq4o.onrender.com/
+```
+
 ### Health Check
 
 ```http
@@ -106,6 +108,13 @@ You can also call it with a query parameter:
 
 ```http
 GET /api/v1/profile?url=https://www.linkedin.com/in/example-profile/
+```
+
+Hosted example:
+
+```powershell
+Invoke-RestMethod "https://linkedin-profile-api-rq4o.onrender.com/api/v1/profile?url=https://www.linkedin.com/in/mvdsu/" |
+ConvertTo-Json -Depth 20
 ```
 
 Successful response:
@@ -170,7 +179,9 @@ Error response:
 
 ## Approach
 
-The API extracts the LinkedIn vanity name from the submitted profile URL, then calls LinkedIn's Voyager web API using the backend session cookies. It first resolves the main profile/top-card response, extracts the profile URN, and then requests profile sections concurrently:
+The API extracts the LinkedIn vanity name from the submitted profile URL, then calls LinkedIn's Voyager web API using backend session cookies. The implementation is purely reverse engineered and browserless: it does not automate login, render LinkedIn pages, or scrape DOM content.
+
+It first resolves the main profile response with LinkedIn's full-profile decoration, extracts the profile URN, and then requests profile sections concurrently:
 
 - position groups for experience
 - education records
