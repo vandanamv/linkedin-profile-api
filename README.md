@@ -2,6 +2,18 @@
 
 A small Express API that accepts a LinkedIn profile URL and returns structured JSON for the public/profile-visible fields available to the authenticated LinkedIn session configured in the backend.
 
+## Live Demo
+
+Hosted API and tester page:
+
+https://linkedin-profile-api-rq4o.onrender.com/
+
+## Screenshot
+
+Add the deployed tester screenshot at `docs/demo-screenshot.png`, then this preview will render in GitHub:
+
+![LinkedIn Profile API tester](docs/demo-screenshot.png)
+
 ## Features
 
 - Accepts LinkedIn profile URLs from `linkedin.com/in/...`
