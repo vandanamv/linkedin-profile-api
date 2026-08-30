@@ -1,0 +1,25 @@
+{
+  "name": "linkedin-profile-api1",
+  "version": "1.0.0",
+  "description": "Hosted API that returns structured LinkedIn profile data from a LinkedIn profile URL.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --check src/client.js && node --check src/parser.js && node --check src/server.js"
+  },
+  "keywords": [
+    "linkedin",
+    "profile",
+    "api",
+    "express"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "axios": "^1.20.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  }
+}
